@@ -1,0 +1,169 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TEMA LATAM - Cultura & Energía
+   🌎 Paleta: Violetas cálidos con dorados y energía regional
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Bases Nocturnas */
+  --latam-violeta: #210D41;
+  --latam-negro: #000000;
+  --latam-acero: #4050C0;
+  
+  /* Energía Regional (Acentos) */
+  --latam-dorado: #8B8117;
+  --latam-sol: #E2B808;
+  --latam-amatista: #984A30;
+  --latam-blanco: #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FONDO LATAM
+   ═══════════════════════════════════════════════════════════════════ */
+
+body {
+  background: linear-gradient(180deg, var(--latam-negro), var(--latam-violeta));
+}
+
+.bg {
+  background: 
+    radial-gradient(1200px 700px at 70% 25%, rgba(226,184,8,.18), transparent 55%),
+    radial-gradient(1100px 700px at 80% 60%, rgba(152,74,48,.14), transparent 55%),
+    radial-gradient(900px 600px at 20% 70%, rgba(64,80,192,.10), transparent 60%),
+    linear-gradient(180deg, var(--latam-negro), var(--latam-violeta));
+}
+
+.bg::before {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(226,184,8,.12), transparent 40%),
+    radial-gradient(circle at 80% 35%, rgba(152,74,48,.12), transparent 38%),
+    radial-gradient(circle at 55% 85%, rgba(64,80,192,.10), transparent 45%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBAR LATAM
+   ═══════════════════════════════════════════════════════════════════ */
+
+html {
+  scrollbar-color: var(--latam-sol) var(--latam-violeta);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--latam-sol), var(--latam-dorado));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--latam-sol);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BRAND LATAM
+   ═══════════════════════════════════════════════════════════════════ */
+
+.brand .mark {
+  box-shadow: 0 0 0 1px rgba(226,184,8,.3), 0 0 40px rgba(226,184,8,.25);
+  background-image: url('../img/logo-latam.png');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GRADIENTES Y COLORES PRIMARIOS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.grad-primary {
+  background: linear-gradient(90deg, var(--latam-sol), var(--latam-amatista));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.prompt-btn {
+  background: linear-gradient(135deg, var(--latam-sol), var(--latam-amatista));
+  box-shadow: 0 10px 30px rgba(226,184,8,.4);
+}
+
+.prompt-btn:hover {
+  box-shadow: 0 20px 50px rgba(226,184,8,.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODELO SELECTOR - LATAM ACTIVO
+   ═══════════════════════════════════════════════════════════════════ */
+
+.model-card[data-model="latam"] {
+  border-color: var(--latam-sol);
+}
+
+.model-card[data-model="latam"].active {
+  border-color: var(--latam-sol);
+  box-shadow: 0 0 0 1px var(--latam-sol), 0 20px 60px rgba(226,184,8,.4);
+}
+
+.model-card[data-model="latam"].active::before {
+  background: radial-gradient(circle at 50% 0%, rgba(226,184,8,.15), transparent 70%);
+  opacity: 1;
+}
+
+.model-card[data-model="latam"]:hover {
+  border-color: var(--latam-sol);
+  box-shadow: 0 10px 40px rgba(226,184,8,.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   INPUTS LATAM
+   ═══════════════════════════════════════════════════════════════════ */
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--latam-sol);
+  box-shadow: 0 0 0 3px rgba(226,184,8,.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOTONES LATAM
+   ═══════════════════════════════════════════════════════════════════ */
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--latam-sol), var(--latam-dorado));
+  box-shadow: 0 10px 30px rgba(226,184,8,.35);
+}
+
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 20px 50px rgba(226,184,8,.5);
+  background: linear-gradient(135deg, var(--latam-sol), var(--latam-amatista));
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--latam-amatista), var(--latam-acero));
+  box-shadow: 0 10px 30px rgba(152,74,48,.35);
+}
+
+.btn-secondary:not(:disabled):hover {
+  box-shadow: 0 20px 50px rgba(152,74,48,.5);
+  background: linear-gradient(135deg, var(--latam-acero), var(--latam-amatista));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SPINNER LATAM
+   ═══════════════════════════════════════════════════════════════════ */
+
+.spinner {
+  border-top-color: var(--latam-sol);
+  border-right-color: var(--latam-amatista);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODAL BUTTONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+#copyBtn {
+  background: linear-gradient(135deg, var(--latam-sol), var(--latam-dorado));
+  box-shadow: 0 10px 30px rgba(226,184,8,.35);
+}
+
+#copyBtn:hover {
+  background: linear-gradient(135deg, var(--latam-sol), var(--latam-amatista));
+  box-shadow: 0 15px 40px rgba(226,184,8,.5);
+}
+
+#copyBtn.copied {
+  background: linear-gradient(135deg, var(--latam-amatista), var(--latam-acero));
+}

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de E-books Digitales - Argentina & LATAM</title>
+
+  <link rel="icon" type="image/png" href="./img/favicon.png" sizes="32x32">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="./css/pagina.css">
+  <link rel="stylesheet" id="themeCSS" href="./css/argentina.css">
+</head>
+
+<body>
+  <div class="bg">
+    <div class="hex"></div>
+    <canvas id="stars"></canvas>
+  </div>
+
+  <div class="wrap">
+    <header id="mainHeader">
+      <nav class="nav">
+        <div class="brand">
+          <div class="mark"></div>
+          <div>
+            <div class="name">GENERADOR DE</div>
+            <span class="sub">E-books Digitales</span>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <div class="container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+          <h1>
+            Generador de <span class="grad-primary">Manuales</span>
+          </h1>
+          <p>
+            Crea E-book Digital profesionales con diseño distintivo para Argentina y LATAM.
+            Sistema optimizado con las mejores prácticas editoriales.
+          </p>
+          <button class="prompt-btn" onclick="mostrarPrompt()">
+            📜 Ver Prompt de Instrucciones
+          </button>
+        </section>
+
+<!-- Selector de Modelo -->
+<div class="model-selector">
+  <div class="model-card active" data-model="argentina" onclick="seleccionarModelo('argentina')">
+    <div class="model-flag">
+      <div class="model-logo-frame model-logo-frame--arg">
+        <img src="./img/logo-escencial.png" alt="Escencial" class="model-logo">
+      </div>
+    </div>
+    <p>Escencial Argentina</p>
+    <div class="model-colors">
+      <span style="background: #22D9DF"></span>
+      <span style="background: #0B4A6E"></span>
+      <span style="background: #C1FF72"></span>
+    </div>
+  </div>
+  
+  <div class="model-card" data-model="latam" onclick="seleccionarModelo('latam')">
+    <div class="model-flag">
+      <div class="model-logo-frame model-logo-frame--lat">
+        <img src="./img/logo-latam.png" alt="LATAM" class="model-logo">
+      </div>
+    </div>
+    <p>Escencial Latam</p>
+    <div class="model-colors">
+      <span style="background: #E2B808"></span>
+      <span style="background: #210D41"></span>
+      <span style="background: #984A30"></span>
+    </div>
+  </div>
+</div>
+
+
+
+        <!-- Formulario -->
+        <div class="form-wrapper">
+          <form id="pdfForm" onsubmit="event.preventDefault();">
+            
+            <!-- Título del Manual -->
+            <div class="field-row">
+              <label for="titulo">
+                <span class="label-icon">📖</span>
+                Título del E-book Digital
+              </label>
+              <input 
+                type="text" 
+                id="titulo" 
+                placeholder="Ej: Marketing Digital Avanzado"
+                required
+              />
+            </div>
+
+            <!-- Subtítulo -->
+            <div class="field-row">
+              <label for="subtitulo">
+                <span class="label-icon">📝</span>
+                Subtítulo
+              </label>
+              <input 
+                type="text" 
+                id="subtitulo" 
+                placeholder="Ej: Estrategias y Tácticas para el Éxito"
+              />
+            </div>
+
+            <!-- Índice -->
+            <div class="field-row">
+              <label for="indice">
+                <span class="label-icon">📑</span>
+                Índice
+                <span class="label-hint">Pegá aquí el índice generado por Claude</span>
+              </label>
+              <textarea 
+                id="indice" 
+                rows="10" 
+                placeholder="# ÍNDICE
+
+INTRODUCCIÓN
+
+CAPÍTULO 1: Fundamentos del Marketing Digital
+1.1. Conceptos Básicos
+1.2. Historia y Evolución
+..."
+              ></textarea>
+            </div>
+
+            <!-- Contenido -->
+            <div class="field-row">
+              <label for="contenido">
+                <span class="label-icon">📄</span>
+                Contenido del E-book Digital
+                <span class="label-hint">Pegá aquí el contenido completo del E-book</span>
+              </label>
+              <textarea 
+                id="contenido" 
+                rows="20" 
+                placeholder="# CAPÍTULO 1: Título del Capítulo
+
+## 1.1 Subtítulo
+
+Contenido del capítulo con **texto en negrita** y texto normal.
+
+### Subsección
+
+Más contenido..."
+                required
+              ></textarea>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="actions">
+              <button type="button" class="btn btn-primary" id="previewBtn" onclick="previsualizarPDF()">
+                👁️ Vista Previa
+              </button>
+              <button type="button" class="btn btn-secondary" id="downloadBtn" onclick="generarPDF()">
+                ✨ Generar y Descargar PDF
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal del Prompt -->
+  <div id="promptModal" class="modal">
+    <div class="modal-backdrop" onclick="cerrarPrompt()"></div>
+    <div class="modal-content prompt-modal">
+      <button class="modal-close" onclick="cerrarPrompt()">×</button>
+      <h2>📜 Instrucciones para Claude</h2>
+      
+      <div class="prompt-box">
+        <pre id="promptText">INSTRUCCIÓN DEFINITIVA PARA LA ELABORACIÓN DE LIBROS DE APOYO A PARTIR DE MATERIAL ADJUNTO
+
+Cuando el usuario indique, debo iniciar la elaboración de un libro completo de apoyo para alumnos, basado exclusivamente en el material que haya sido adjuntado. Si no se ha proporcionado ningún archivo, mi única respuesta será:
+
+"Por favor, adjunta el material base (textos, apuntes o documentos) para elaborar el libro. Sin ese material no puedo iniciar la redacción."
+
+El libro debe construirse como una obra bibliográfica autónoma, no como un complemento de clases en vivo, ni como una transcripción, ni como un manual de curso. Toda la redacción debe ser clara, sólida, técnica, pedagógica y profesional, con enfoque formativo y profundidad conceptual, pensada para que el alumno pueda estudiar por su cuenta.
+
+El primer paso será siempre elaborar y entregar un índice completo y detallado, redactado con estilo editorial, como si ya formara parte del libro. Ese índice debe incluir una introducción general, capítulos organizados por temas centrales, subdivididos internamente por ejes o secciones conceptuales. Debe haber conclusiones parciales al final de cada capítulo, una conclusión general final y un glosario de términos clave, cuando corresponda.
+
+Una vez que el índice esté aprobado por el usuario, comenzaré a desarrollar cada capítulo de forma completa, acabada y definitiva, respetando la extensión, estilo y profundidad exigida. No debo anticipar estructura, ni explicar cómo voy a abordar los capítulos: simplemente los debo entregar ya redactados como parte de un libro formal.
+
+La extensión total del libro debe estar entre 30.000 y 32.000 palabras, lo que equivale aproximadamente a 35 a 45 páginas en formato editorial estándar. Cada capítulo debe estar completamente desarrollado, incluyendo explicaciones teóricas, interpretación normativa si corresponde, ejemplos, casos prácticos o situaciones reales tomadas del material fuente. Los conceptos deben estar claramente explicados, con precisión terminológica y sin simplificaciones excesivas.
+
+El tono debe ser objetivo, técnico, formal y bibliográfico. No debe utilizarse un lenguaje coloquial, narrativo o dirigido al lector. No deben aparecer expresiones como "en este capítulo vas a ver", "como veremos más adelante", "te vamos a mostrar", "podés notar que...", etc. Tampoco se deben usar marcas de oralidad, ni referencias al contexto de cursada, ni a docentes, módulos, clases, zooms, ni ninguna otra instancia académica externa al libro.
+
+El texto debe estar libre de numeración de clases. No se debe utilizar "Clase 1", "Clase 2" o "Módulo 3". Solo deben emplearse capítulos y secciones temáticas como en cualquier libro profesional. Los títulos y subtítulos deben ser fluidos, coherentes y alineados con la voz editorial general de la obra.
+
+Al final de cada capítulo debe incluirse un resumen conceptual o conclusión parcial, redactado con el mismo estilo formal, que permita afianzar lo desarrollado y reforzar los aprendizajes clave. La conclusión general del libro debe servir como cierre reflexivo del conjunto, integrando los temas tratados con una mirada sistémica.
+
+El glosario de términos debe estar organizado en formato tradicional, ordenado alfabéticamente, y redactado con este estilo: Término — definición clara, precisa y técnica, sin ejemplos coloquiales, sin redundancias ni explicaciones imprecisas.
+
+El libro completo debe estar listo para ser entregado directamente a estudiantes como material de estudio formal. No debe contener instrucciones metodológicas, explicaciones sobre cómo fue elaborado, ni referencias internas al proceso de redacción.</pre>
+      </div>
+
+      <button class="btn btn-primary" id="copyBtn" onclick="copiarPrompt()">
+        📋 Copiar Prompt
+      </button>
+    </div>
+  </div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MODAL DE VISTA PREVIA - VERSIÓN MEJORADA
+     Reemplaza tu modal actual con este código
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- Modal de Vista Previa -->
+<div id="pdfPreviewModal" class="modal preview-modal">
+  <div class="modal-backdrop" onclick="cerrarVistaPrevia()"></div>
+  
+  <div class="modal-content">
+    <!-- Header del modal con título y botón cerrar -->
+    <div class="modal-header">
+      <h2>📄 Vista Previa del E-book Digital</h2>
+      <button class="modal-close" onclick="cerrarVistaPrevia()" title="Cerrar (Esc)">×</button>
+    </div>
+    
+    <!-- Spinner de carga -->
+    <div id="loadingSpinner" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>⏳ Generando tu E-book Digital...</p>
+    </div>
+    
+    <!-- Contenedor del PDF -->
+    <div id="pdfContainer" class="pdf-container">
+      <iframe id="pdfFrame" title="Vista previa del PDF"></iframe>
+    </div>
+  </div>
+</div>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>
