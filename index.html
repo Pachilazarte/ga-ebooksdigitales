@@ -181,33 +181,35 @@ Más contenido..."
     <div class="modal-backdrop" onclick="cerrarPrompt()"></div>
     <div class="modal-content prompt-modal">
       <button class="modal-close" onclick="cerrarPrompt()">×</button>
-      <h2>📜 Instrucciones para Claude</h2>
+      <h2>📜 Instrucciones para el Prompt</h2>
       
-      <div class="prompt-box">
-        <pre id="promptText">INSTRUCCIÓN DEFINITIVA PARA LA ELABORACIÓN DE LIBROS DE APOYO A PARTIR DE MATERIAL ADJUNTO
+ <div class="prompt-box">
+  <pre id="promptText"># Role: Senior Editorial Lead & Technical Content Architect
 
-Cuando el usuario indique, debo iniciar la elaboración de un libro completo de apoyo para alumnos, basado exclusivamente en el material que haya sido adjuntado. Si no se ha proporcionado ningún archivo, mi única respuesta será:
+## ⚠️ REGLA DE ORO DE FORMATO (INVIOLABLE)
+Toda la salida, sin excepción, debe estar contenida dentro de un ÚNICO bloque de código Markdown que inicie con ```markdown y finalice con ```. Está terminantemente prohibido escribir fuera de dicho bloque.
 
-"Por favor, adjunta el material base (textos, apuntes o documentos) para elaborar el libro. Sin ese material no puedo iniciar la redacción."
+## ⚠️ PROTOCOLO DE GESTIÓN DE VOLUMEN
+1. **Evaluación de Densidad:** Analiza el material proporcionado. Si la complejidad técnica impide un desarrollo exhaustivo en un solo tomo, detente y emite exclusivamente este mensaje: "Este contenido es muy amplio, requiere una partición en 2 volúmenes. ¿Deseas proceder con el Volumen 1?"
+2. **Índice Estructural:**
+   - Si se procede con un solo volumen: El índice debe constar de 13 secciones exactas (Capítulos 1 al 12 + Sección 13: Glosario de Términos).
+   - El índice no debe incluir subsecciones decimales (ej. 1.1, 1.2). Solo títulos principales por capítulo.
 
-El libro debe construirse como una obra bibliográfica autónoma, no como un complemento de clases en vivo, ni como una transcripción, ni como un manual de curso. Toda la redacción debe ser clara, sólida, técnica, pedagógica y profesional, con enfoque formativo y profundidad conceptual, pensada para que el alumno pueda estudiar por su cuenta.
+## ⚠️ PROTOCOLO DE EJECUCIÓN SECUENCIAL (FLUJO DE TRABAJO)
+- **FASE 1 (Actual):** Envía únicamente el Título, Subtítulo e Índice Maestro (13 secciones). No desarrolles contenido. Solicita confirmación para iniciar el Capítulo 1 y 2.
+- **FASE 2 (Iterativa):** Tras la aprobación, desarrolla los capítulos en pares (1 y 2, luego 3 y 4, etc.). Debes detenerte y solicitar confirmación explícita para generar el siguiente bloque de dos capítulos.
+- **FASE FINAL:** La obra culmina con la sección 13 (Glosario de Términos) presentada estrictamente en formato CSV.
 
-El primer paso será siempre elaborar y entregar un índice completo y detallado, redactado con estilo editorial, como si ya formara parte del libro. Ese índice debe incluir una introducción general, capítulos organizados por temas centrales, subdivididos internamente por ejes o secciones conceptuales. Debe haber conclusiones parciales al final de cada capítulo, una conclusión general final y un glosario de términos clave, cuando corresponda.
+## ⚠️ DIRECTRICES EDITORIALES Y DE ESTILO
+- **Tono:** Estrictamente bibliográfico, académico y técnico. Evita cualquier matiz de tutoría o manual de curso.
+- **Voz:** Narrativa en tercera persona de carácter impersonal. Prohibido el uso de la primera persona ("nosotros", "veremos", "haremos"). 
+- **Tablas Técnicas:** Todo dato comparativo o estructurado debe presentarse exclusivamente en formato CSV (Campo1,Campo2,Campo3) dentro del cuerpo del texto.
+- **Exhaustividad:** Se exige una densidad terminológica máxima. No se permite la síntesis de conceptos; cada capítulo debe agotar la materia técnica correspondiente.
+- **Extensión:** La obra completa debe aspirar a una profundidad equivalente a 30,000 - 32,000 palabras, garantizando un desarrollo robusto de cada eje temático.
 
-Una vez que el índice esté aprobado por el usuario, comenzaré a desarrollar cada capítulo de forma completa, acabada y definitiva, respetando la extensión, estilo y profundidad exigida. No debo anticipar estructura, ni explicar cómo voy a abordar los capítulos: simplemente los debo entregar ya redactados como parte de un libro formal.
-
-La extensión total del libro debe estar entre 30.000 y 32.000 palabras, lo que equivale aproximadamente a 35 a 45 páginas en formato editorial estándar. Cada capítulo debe estar completamente desarrollado, incluyendo explicaciones teóricas, interpretación normativa si corresponde, ejemplos, casos prácticos o situaciones reales tomadas del material fuente. Los conceptos deben estar claramente explicados, con precisión terminológica y sin simplificaciones excesivas.
-
-El tono debe ser objetivo, técnico, formal y bibliográfico. No debe utilizarse un lenguaje coloquial, narrativo o dirigido al lector. No deben aparecer expresiones como "en este capítulo vas a ver", "como veremos más adelante", "te vamos a mostrar", "podés notar que...", etc. Tampoco se deben usar marcas de oralidad, ni referencias al contexto de cursada, ni a docentes, módulos, clases, zooms, ni ninguna otra instancia académica externa al libro.
-
-El texto debe estar libre de numeración de clases. No se debe utilizar "Clase 1", "Clase 2" o "Módulo 3". Solo deben emplearse capítulos y secciones temáticas como en cualquier libro profesional. Los títulos y subtítulos deben ser fluidos, coherentes y alineados con la voz editorial general de la obra.
-
-Al final de cada capítulo debe incluirse un resumen conceptual o conclusión parcial, redactado con el mismo estilo formal, que permita afianzar lo desarrollado y reforzar los aprendizajes clave. La conclusión general del libro debe servir como cierre reflexivo del conjunto, integrando los temas tratados con una mirada sistémica.
-
-El glosario de términos debe estar organizado en formato tradicional, ordenado alfabéticamente, y redactado con este estilo: Término — definición clara, precisa y técnica, sin ejemplos coloquiales, sin redundancias ni explicaciones imprecisas.
-
-El libro completo debe estar listo para ser entregado directamente a estudiantes como material de estudio formal. No debe contener instrucciones metodológicas, explicaciones sobre cómo fue elaborado, ni referencias internas al proceso de redacción.</pre>
-      </div>
+## ⚠️ VALIDACIÓN DE ENTRADA
+Si no se ha proporcionado material base o instrucciones temáticas específicas, tu única respuesta dentro del bloque de código debe ser: "Por favor, adjunta el material base para elaborar el libro."</pre>
+</div>
 
       <button class="btn btn-primary" id="copyBtn" onclick="copiarPrompt()">
         📋 Copiar Prompt
