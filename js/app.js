@@ -508,7 +508,7 @@ if (subtitulo && subtitulo.trim()) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// GENERACIÓN DE ÍNDICE
+// GENERACIÓN DE ÍNDICE - CORREGIDO
 // ═══════════════════════════════════════════════════════════════════
 
 function generarIndiceConEstilo(doc, indiceRaw) {
@@ -520,21 +520,20 @@ function generarIndiceConEstilo(doc, indiceRaw) {
   doc.addPage();
   dibujarFondoPagina(doc);
 
-  // ✅ Más arriba y más compacto (antes: CFG.MT + 10)
   cursorY = CFG.MT + 4;
   
-  // Título del índice (más chico para que no coma tanto espacio)
+  // Título del índice
   doc.setFont(CFG.FONT, 'bold');
-  doc.setFontSize(18); // antes 26
+  doc.setFontSize(22);
   doc.setTextColor(...CFG.COLORS.primario);
   doc.text('ÍNDICE', CFG.PAGE_W / 2, cursorY, { align: 'center' });
-  cursorY += 8; // antes 15
+  cursorY += 12;
   
-  // Línea decorativa (más fina y con menos separación)
+  // Línea decorativa
   doc.setDrawColor(...CFG.COLORS.primario);
-  doc.setLineWidth(0.6); // antes 1
+  doc.setLineWidth(0.6);
   doc.line(CFG.ML, cursorY, CFG.MR, cursorY);
-  cursorY += 12; // antes 12
+  cursorY += 10;
   
   // Procesar contenido del índice
   const lineas = indiceRaw
@@ -543,33 +542,52 @@ function generarIndiceConEstilo(doc, indiceRaw) {
     .filter(l => l && !l.startsWith('#'));
   
   lineas.forEach(linea => {
-    // ✅ cada item ocupa menos alto (esto baja la cantidad de páginas)
-    const espacioNecesario = 7; // antes 7
-    verificarEspacioYSaltarPagina(doc, espacioNecesario);
-    
     const matchNum = linea.match(/^(\d+(?:\.\d+)*\.?)\s*(.*)/);
     
     if (matchNum) {
       const numero = matchNum[1];
       const texto = matchNum[2];
       const nivel = (numero.match(/\./g) || []).length;
-
-      // ✅ menos indent para que no se “coma” ancho y no “aplastes” tanto
-      const indent = CFG.ML + (nivel * 6); // antes * 8
+      const indent = CFG.ML + (nivel * 5);
+      
+      // Calcular ancho máximo para el texto
+      const anchoNumero = 15; // Espacio reservado para el número
+      const maxWidth = CFG.MR - indent - anchoNumero;
+      
+      // Dividir texto en líneas si es muy largo
+      doc.setFont(CFG.FONT, 'normal');
+      doc.setFontSize(11);
+      const lineasTexto = doc.splitTextToSize(texto, maxWidth);
+      
+      // Verificar espacio para todas las líneas del item
+      const espacioTotal = lineasTexto.length * 6;
+      verificarEspacioYSaltarPagina(doc, espacioTotal + 2);
       
       // Número
       doc.setFont(CFG.FONT, 'bold');
-      doc.setFontSize(13); // antes 10
+      doc.setFontSize(11);
       doc.setTextColor(...CFG.COLORS.primario);
       doc.text(numero, indent, cursorY);
       
-      // Texto
+      // Texto (puede ocupar múltiples líneas)
       doc.setFont(CFG.FONT, 'normal');
       doc.setTextColor(...CFG.COLORS.texto);
-      escribirLineaConNegritas(texto, indent + 12, cursorY, 9, CFG.COLORS.texto); // antes +15 y size 10
+      
+      lineasTexto.forEach((lineaTexto, idx) => {
+        if (idx > 0) {
+          // Para líneas continuadas, verificar espacio
+          verificarEspacioYSaltarPagina(doc, 6);
+        }
+        escribirLineaConNegritas(lineaTexto, indent + anchoNumero, cursorY, 11, CFG.COLORS.texto);
+        cursorY += 6;
+      });
+      
+      cursorY += 1; // Pequeño espacio entre items
+      
     } else {
+      // Línea sin numeración (títulos de sección)
       doc.setFont(CFG.FONT, 'normal');
-      doc.setFontSize(18); // antes 10
+      doc.setFontSize(12);
       doc.setTextColor(...CFG.COLORS.texto);
       
       if (linea.toUpperCase() === linea && linea.length < 50) {
@@ -577,11 +595,194 @@ function generarIndiceConEstilo(doc, indiceRaw) {
         doc.setTextColor(...CFG.COLORS.primario);
       }
       
-      doc.text(linea, CFG.ML, cursorY);
+      // Dividir si es muy largo
+      const maxWidth = CFG.MR - CFG.ML;
+      const lineasTexto = doc.splitTextToSize(linea, maxWidth);
+      
+      lineasTexto.forEach(lineaTexto => {
+        verificarEspacioYSaltarPagina(doc, 6);
+        doc.text(lineaTexto, CFG.ML, cursorY);
+        cursorY += 6;
+      });
+      
+      cursorY += 2;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FUNCIONES PARA PROCESAR TABLAS CSV
+// ═══════════════════════════════════════════════════════════════════
+
+function parsearCSV(textoCSV) {
+  const lineas = textoCSV.trim().split('\n');
+  const datos = [];
+  
+  lineas.forEach(linea => {
+    // Parsear CSV respetando comillas
+    const row = [];
+    let celda = '';
+    let dentroComillas = false;
+    
+    for (let i = 0; i < linea.length; i++) {
+      const char = linea[i];
+      
+      if (char === '"') {
+        dentroComillas = !dentroComillas;
+      } else if (char === ',' && !dentroComillas) {
+        row.push(celda.trim());
+        celda = '';
+      } else {
+        celda += char;
+      }
     }
     
-    cursorY += espacioNecesario;
+    // Agregar última celda
+    row.push(celda.trim());
+    datos.push(row);
   });
+  
+  return datos;
+}
+
+function calcularAnchoColumnas(doc, datos, anchoTotal) {
+  const CFG = obtenerConfigPDF();
+  const numColumnas = datos[0].length;
+  
+  // Calcular ancho necesario para cada columna basado en el contenido
+  const anchosNecesarios = [];
+  
+  for (let col = 0; col < numColumnas; col++) {
+    let maxAncho = 0;
+    
+    datos.forEach((fila, idx) => {
+      const celda = fila[col] || '';
+      doc.setFont(CFG.FONT, idx === 0 ? 'bold' : 'normal');
+      doc.setFontSize(idx === 0 ? 9 : 8.5);
+      const ancho = doc.getTextWidth(celda);
+      maxAncho = Math.max(maxAncho, ancho);
+    });
+    
+    anchosNecesarios.push(maxAncho + 4); // Padding
+  }
+  
+  // Calcular proporción para ajustar al ancho total
+  const sumaAnchos = anchosNecesarios.reduce((a, b) => a + b, 0);
+  const factor = anchoTotal / sumaAnchos;
+  
+  // Aplicar proporción, pero respetando mínimos
+  const anchoMin = 25;
+  const anchosFinales = anchosNecesarios.map(ancho => {
+    const anchoAjustado = ancho * factor;
+    return Math.max(anchoAjustado, anchoMin);
+  });
+  
+  // Si se pasó del ancho total, reajustar proporcionalmente
+  const sumaFinal = anchosFinales.reduce((a, b) => a + b, 0);
+  if (sumaFinal > anchoTotal) {
+    const factorFinal = anchoTotal / sumaFinal;
+    return anchosFinales.map(ancho => ancho * factorFinal);
+  }
+  
+  return anchosFinales;
+}
+
+
+function dibujarTabla(doc, datos) {
+  const CFG = obtenerConfigPDF();
+  const anchoTotal = CFG.MR - CFG.ML;
+  const anchoColumnas = calcularAnchoColumnas(doc, datos, anchoTotal);
+  
+  const alturaFilaEncabezado = 8;
+  const alturaFila = 7;
+  
+  datos.forEach((fila, idxFila) => {
+    const esEncabezado = idxFila === 0;
+    const altura = esEncabezado ? alturaFilaEncabezado : alturaFila;
+    
+    // Calcular altura real necesaria (para celdas con texto largo)
+    let alturaMaxima = altura;
+    
+    fila.forEach((celda, idxCol) => {
+      const texto = String(celda || '').trim();
+      const anchoCol = anchoColumnas[idxCol];
+      const anchoDisponible = anchoCol - 3;
+      
+      doc.setFont(CFG.FONT, esEncabezado ? 'bold' : 'normal');
+      doc.setFontSize(esEncabezado ? 9 : 8.5);
+      
+      const lineasTexto = doc.splitTextToSize(texto, anchoDisponible);
+      const alturaTexto = lineasTexto.length * (esEncabezado ? 4.5 : 4.2);
+      alturaMaxima = Math.max(alturaMaxima, alturaTexto + 3);
+    });
+    
+    // Verificar si hay espacio para la fila completa
+    verificarEspacioYSaltarPagina(doc, alturaMaxima + 2);
+    
+    let xPos = CFG.ML;
+    const yInicio = cursorY;
+    
+    // Dibujar celdas
+    fila.forEach((celda, idxCol) => {
+      const anchoCol = anchoColumnas[idxCol];
+      const texto = String(celda || '').trim();
+      
+      // Fondo de encabezado
+      if (esEncabezado) {
+        doc.setFillColor(...CFG.COLORS.primario);
+        doc.rect(xPos, yInicio, anchoCol, alturaMaxima, 'F');
+      }
+      
+      // Borde de celda
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.rect(xPos, yInicio, anchoCol, alturaMaxima);
+      
+      // Texto
+      doc.setFont(CFG.FONT, esEncabezado ? 'bold' : 'normal');
+      doc.setFontSize(esEncabezado ? 9 : 8.5);
+      
+      // Color del texto
+      if (esEncabezado) {
+        doc.setTextColor(255, 255, 255);
+      } else {
+        doc.setTextColor(...CFG.COLORS.texto);
+      }
+      
+      const anchoDisponible = anchoCol - 3;
+      const lineasTexto = doc.splitTextToSize(texto, anchoDisponible);
+      
+      let yTexto = yInicio + 4;
+      lineasTexto.forEach(linea => {
+        doc.text(linea, xPos + 1.5, yTexto);
+        yTexto += esEncabezado ? 4.5 : 4.2;
+      });
+      
+      xPos += anchoCol;
+    });
+    
+    cursorY += alturaMaxima;
+  });
+  
+  cursorY += 8;
+}
+
+
+function procesarTabla(doc, bloque) {
+  const CFG = obtenerConfigPDF();
+  
+  // Verificar que tengamos datos válidos
+  if (!bloque.datos || bloque.datos.length === 0) {
+    console.warn('⚠️ Tabla sin datos');
+    return;
+  }
+  
+  console.log('📊 Procesando tabla con', bloque.datos.length, 'filas');
+  
+  // Espacio antes de la tabla
+  cursorY += 4;
+  
+  dibujarTabla(doc, bloque.datos);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -592,11 +793,51 @@ function parsearMarkdown(texto) {
   const lineas = texto.split('\n');
   const bloques = [];
   let bloqueActual = null;
+  let dentroTablaCSV = false;
+  let lineasTabla = [];
   
   lineas.forEach((linea, idx) => {
     const trimmed = linea.trim();
     
-    // Línea vacía - cerrar bloque actual si existe
+    // Detectar inicio de tabla CSV (línea con comas entre comillas)
+const esLineaCSV = /^"[^"]*"(?:,"[^"]*")+$/.test(trimmed);
+
+    
+    if (esLineaCSV && !dentroTablaCSV) {
+      // Iniciar tabla CSV
+      if (bloqueActual) {
+        bloques.push(bloqueActual);
+        bloqueActual = null;
+      }
+      dentroTablaCSV = true;
+      lineasTabla = [trimmed];
+      return;
+    }
+    
+    if (dentroTablaCSV) {
+      if (esLineaCSV) {
+        // Continuar tabla
+        lineasTabla.push(trimmed);
+        return;
+      } else {
+        // Fin de tabla
+        const textoCSV = lineasTabla.join('\n');
+        const datosTabla = parsearCSV(textoCSV);
+        
+        bloques.push({
+          tipo: 'tabla',
+          datos: datosTabla
+        });
+        
+        dentroTablaCSV = false;
+        lineasTabla = [];
+        
+        // Procesar la línea actual normalmente
+        if (!trimmed) return;
+      }
+    }
+    
+    // Línea vacía
     if (!trimmed) {
       if (bloqueActual && bloqueActual.tipo === 'parrafo' && bloqueActual.lineas.length > 0) {
         bloques.push(bloqueActual);
@@ -667,6 +908,16 @@ function parsearMarkdown(texto) {
     }
   });
   
+  // Cerrar tabla si quedó abierta
+  if (dentroTablaCSV && lineasTabla.length > 0) {
+    const textoCSV = lineasTabla.join('\n');
+    const datosTabla = parsearCSV(textoCSV);
+    bloques.push({
+      tipo: 'tabla',
+      datos: datosTabla
+    });
+  }
+  
   if (bloqueActual && bloqueActual.lineas && bloqueActual.lineas.length > 0) {
     bloques.push(bloqueActual);
   }
@@ -699,6 +950,9 @@ function procesarBloques(doc, bloques) {
       case 'lista':
         procesarLista(doc, bloque);
         break;
+      case 'tabla':  // ⬅️ AGREGAR ESTA LÍNEA
+        procesarTabla(doc, bloque);  // ⬅️ Y ESTA
+        break;  // ⬅️ Y ESTA
       case 'parrafo':
         procesarParrafo(doc, bloque);
         break;
@@ -1075,8 +1329,9 @@ async function generarPDF() {
     }
     
     const titulo = document.getElementById('titulo').value || 'Manual';
-    const nombreModelo = CONFIG_MODELOS[modeloActual].nombre;
-    const nombreArchivo = `${titulo.replace(/\s+/g, '_')}_${nombreModelo}.pdf`;
+    
+    // ✅ ACTUALIZADO: Formato E-BOOK - Título
+    const nombreArchivo = `E-BOOK - ${titulo}.pdf`;
     
     doc.save(nombreArchivo);
     
